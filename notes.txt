@@ -1,0 +1,22 @@
+<mac address='52:54:00:a3:4d:89'/>
+
+Networking with KVM
+https://aboullaite.me/kvm-qemo-forward-ports-with-iptables/
+
+Setup KVM on Ubuntu 18.04
+https://blog.programster.org/set-up-ubuntu-18-04-KVM-server
+https://ostechnix.com/setup-headless-virtualization-server-using-kvm-ubuntu/
+
+Helper Script to create VM
+https://blog.programster.org/ubuntu-18-04-getting-started-with-kvm-using-php-helper-script
+
+https://wiki.libvirt.org/page/Networking#Forwarding_Incoming_Connections
+
+iptables -I FORWARD -o virbr0 -d 192.168.122.3 -j ACCEPT
+iptables -t nat -I PREROUTING -p tcp --dport 9867 -j DNAT --to 192.168.122.3:22
+
+iptables -I FORWARD -o virbr0 -d  192.168.122.3 -j ACCEPT
+iptables -t nat -A POSTROUTING -s 192.168.122.0/24 -j MASQUERADE
+iptables -A FORWARD -o virbr0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -i virbr0 -o eth0 -j ACCEPT
+iptables -A FORWARD -i virbr0 -o lo -j ACCEPT
