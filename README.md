@@ -6,6 +6,20 @@ Esse tipo de instâncias EC2 oferecem o melhor dos dois mundos, permitindo que o
 
 [Amazon EC2 Bare Metal Instances](https://aws.amazon.com/blogs/aws/new-amazon-ec2-bare-metal-instances-with-direct-access-to-hardware/)
 
+# Sumário
+
+- [Pré-requisitos](#pr--requisitos)
+- [Criando nossa Amazon EC2](#criando-nossa-amazon-ec2)
+- [Instalando o KVM](#instalando-o-kvm)
+- [Criando a primeira VM Ubuntu](#criando-a-primeira-vm-ubuntu)
+- [Definindo um IP estático utilizando a rede Default Nat-based networking](#definindo-um-ip-est-tico-utilizando-a-rede-default-nat-based-networking)
+  * [Definindo o IP estático para a nossa VM](#definindo-o-ip-est-tico-para-a-nossa-vm)
+- [Expondo nossa VM para acesso externo via IP Tables](#expondo-nossa-vm-para-acesso-externo-via-ip-tables)
+- [Criando nosso primeiro servidor Windows](#criando-nosso-primeiro-servidor-windows)
+  * [Pré-requisitos](#pr--requisitos-1)
+  * [Criando VM Windows](#criando-vm-windows)
+- [Referências](#refer-ncias)
+
 # Pré-requisitos
 
 - Amazon VPC configurada com no minínimo uma subnet pública
