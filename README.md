@@ -1,6 +1,10 @@
 # bare-metal-nested-virtualization
 
-O propósito desse repositório é mostrar formas de virtualização utilizando KVM em um servidor bare metal hospedado na AWS
+O propósito desse repositório é mostrar formas de virtualização utilizando KVM em um servidor bare metal na AWS
+
+Esse tipo de instâncias EC2 oferecem o melhor dos dois mundos, permitindo que o sistema operacional seja executado diretamente no hardware subjacente, ao mesmo tempo que fornece acesso a todos os benefícios da nuvem.
+
+[Amazon EC2 Bare Metal Instances](https://aws.amazon.com/blogs/aws/new-amazon-ec2-bare-metal-instances-with-direct-access-to-hardware/)
 
 # Pré Requisitos
 
@@ -69,3 +73,61 @@ Aguarde alguns minutos para que sua EC2 esteja pronta para ser acessada
 </p>
 
 # Instalando o KVM
+
+Neste repositório existem alguns scripts que nos ajudarão a realizar todos as etapas de configuração.
+
+```bash
+ssh -i bare-metal-demo.pem ubuntu@XXX.XXX.XXX.XXX
+```
+
+Realize SSH no servidor e siga os passos a seguir:
+
+
+```bash
+sudo su - 
+```
+
+```bash
+cd /opt/ && apt-get update && apt-get install git -y
+```
+
+```
+git clone https://github.com/BRCentralSA/bare-metal-nested-virtualization.git
+```
+
+Realize a instalacão do KVM e dos componentes necessários
+
+```
+cd bare-metal-nested-virtualization && ./install-kvm-ubuntu.sh
+```
+
+# Criando nosso primeiro servidor Ubuntu
+
+Nesta demonstração iremos criar um servidor Ubuntu 18.04 com 1GB de RAM e 2 vCpu
+
+```
+./create-ubuntu-vm.sh
+```
+
+Aguarde a finalização da criação, pode levar algum tempo, após finalizar será necessário realizar o login novamente no servidor
+
+# Definindo um IP estático utilizando a rede Default Nat-based networking
+
+Iremos utilizar a rede **default** criada no processo de instalação do KVM
+
+Utilizando o **virsh**
+
+Você pode criar, excluir, executar, parar e gerenciar suas máquinas virtuais a partir da linha de comando, usando uma ferramenta chamada virsh. Virsh é particularmente útil para administradores Linux avançados, interessados ​​em scripts ou automatizar alguns aspectos do gerenciamento de suas máquinas virtuais
+
+```bash
+virsh net-list
+```
+
+
+```bash
+virsh net-info default
+```
+
+A rede baseada em NAT é comumente fornecida e habilitada como padrão pela maioria das principais distribuições de Linux que suportam virtualização KVM.
+
+Esta configuração de rede usa uma ponte Linux em combinação com Network Address Translation (NAT) para permitir que um sistema operacional convidado obtenha conectividade de saída, independentemente do tipo de rede (com fio, sem fio, dial-up e assim por diante) usado no host KVM sem exigindo qualquer configuração de administrador específica.

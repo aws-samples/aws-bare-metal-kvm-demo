@@ -12,6 +12,10 @@ https://blog.programster.org/ubuntu-18-04-getting-started-with-kvm-using-php-hel
 
 https://wiki.libvirt.org/page/Networking#Forwarding_Incoming_Connections
 
+
+Libvirt Default Networking
+https://wiki.libvirt.org/page/Networking
+
 iptables -I FORWARD -o virbr0 -d 192.168.122.3 -j ACCEPT
 iptables -t nat -I PREROUTING -p tcp --dport 9867 -j DNAT --to 192.168.122.3:22
 
