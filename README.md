@@ -6,7 +6,7 @@ Esse tipo de instâncias EC2 oferecem o melhor dos dois mundos, permitindo que o
 
 [Amazon EC2 Bare Metal Instances](https://aws.amazon.com/blogs/aws/new-amazon-ec2-bare-metal-instances-with-direct-access-to-hardware/)
 
-# Pré Requisitos
+# Pré-requisitos
 
 - Amazon VPC configurada com no minínimo uma subnet pública
 
@@ -101,7 +101,7 @@ Realize a instalacão do KVM e dos componentes necessários
 cd bare-metal-nested-virtualization && ./install-kvm-ubuntu.sh
 ```
 
-# Criando nosso primeiro servidor Ubuntu
+# Criando a primeira VM Ubuntu
 
 Nesta demonstração iremos criar um servidor Ubuntu 18.04 com 1GB de RAM e 2 vCpu
 
@@ -306,3 +306,69 @@ O resultado deve ser o mesmo de realizar o login de dentro do Host OS
 </p>
 
 # Criando nosso primeiro servidor Windows
+
+Criando nosso primeiro servidor Windows, para essa demo utilizaremos o [Windows Server 2019](https://www.microsoft.com/pt-br/windows-server), como não possuímos display gráfico em nossa EC2 realizaremos o setup via VNC (Virtual Network Computing)
+
+## Pré-requisitos
+
+- [ISO Windows Server 2019](https://www.microsoft.com/pt-br/evalcenter/evaluate-windows-server-2019)
+- VNC Software
+
+
+## Criando VM Windows
+
+Utilizaremos scripts de apoio para criação do servidor Windows com 2GB de RAM e 4 vCpu
+
+
+```
+./create-windows-vm.sh
+```
+Aponte para a ISO que você fez o download nos pré-requisitos
+
+<p align="center"> 
+<img src="images/windows-iso.png">
+</p>
+
+O processo de instalação será iniciado
+
+<p align="center"> 
+<img src="images/windows-install.png">
+</p>
+
+Precisaremos conectar via VNC em nossa máquina virtual para iniciar o setup de instalação do Windows gráficamente
+
+<p align="center"> 
+<img src="images/vnc.png">
+</p>
+
+Conectaremos no **IP Público de nossa EC2 na porta 5904**
+
+<p align="center"> 
+<img src="images/windows-vnc-01.png">
+</p>
+
+Clique em Next para iniciar a instalação e depois em Install Now
+
+<p align="center"> 
+<img src="images/windows-vnc-02.png">
+</p>
+
+Selecione a segunda opção e clique em Next
+
+<p align="center"> 
+<img src="images/windows-vnc-03.png">
+</p>
+
+Clique em Load Driver, selecionaremos o driver do VirtIO
+
+<p align="center"> 
+<img src="images/windows-vnc-04.png">
+</p>
+
+Clique em Browse > E: > amd64 > 2K19 e depois em Next
+
+<p align="center"> 
+<img src="images/windows-vnc-05.png">
+</p>
+
+A Instalação será iniciada, aguarde até a finalização
