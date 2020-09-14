@@ -1,4 +1,4 @@
-# bare-metal-nested-virtualization
+# aws-bare-metal-kvm
 
 O propósito desse repositório é mostrar formas de virtualização utilizando KVM em um servidor bare metal na AWS
 
@@ -106,13 +106,13 @@ cd /opt/ && apt-get update && apt-get install git -y
 ```
 
 ```
-git clone https://github.com/BRCentralSA/bare-metal-nested-virtualization.git
+git clone https://github.com/BRCentralSA/aws-bare-metal-kvm.git
 ```
 
 Realize a instalacão do KVM e dos componentes necessários
 
 ```
-cd bare-metal-nested-virtualization && ./install-kvm-ubuntu.sh
+cd aws-bare-metal-kvm && ./install-kvm-ubuntu.sh
 ```
 
 # Criando a primeira VM Ubuntu
