@@ -337,6 +337,8 @@ O processo de instalação será iniciado
 
 Precisaremos conectar via VNC em nossa máquina virtual para iniciar o setup de instalação do Windows gráficamente
 
+> Obs: Não esqueça de liberar o Security Group na nossa EC2 para a porta 5904
+
 <p align="center"> 
 <img src="images/vnc.png">
 </p>
@@ -372,3 +374,35 @@ Clique em Browse > E: > amd64 > 2K19 e depois em Next
 </p>
 
 A Instalação será iniciada, aguarde até a finalização
+
+<p align="center"> 
+<img src="images/windows-vnc-06.png">
+</p>
+
+Defina a senha para o usuário Administrator e clique em Finish
+
+<p align="center"> 
+<img src="images/windows-vnc-07.png">
+</p>
+
+A instalação terá sido finalizada
+
+> Obs: Pode ser que seja necessário realizar a instalação de alguns drivers extras. Instalação de [virtio-drivers](https://linuxhint.com/install_virtio_drivers_kvm_qemu_windows_vm/)
+
+# Referências
+
+Networking with KVM
+https://aboullaite.me/kvm-qemo-forward-ports-with-iptables/
+
+Setup KVM on Ubuntu 18.04
+https://blog.programster.org/set-up-ubuntu-18-04-KVM-server
+https://ostechnix.com/setup-headless-virtualization-server-using-kvm-ubuntu/
+
+Helper Script to create VM
+https://blog.programster.org/ubuntu-18-04-getting-started-with-kvm-using-php-helper-script
+
+Forwarding connection
+https://wiki.libvirt.org/page/Networking#Forwarding_Incoming_Connections
+
+Libvirt Default Networking
+https://wiki.libvirt.org/page/Networking
