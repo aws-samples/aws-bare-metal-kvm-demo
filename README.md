@@ -111,6 +111,26 @@ Nesta demonstração iremos criar um servidor Ubuntu 18.04 com 1GB de RAM e 2 vC
 
 Aguarde a finalização da criação, pode levar algum tempo, após finalizar será necessário realizar o login novamente no servidor
 
+Uma tela de Logon será mostrada, utilize o usuário e senha default.
+
+**User:** ubuntu
+
+**Pass:** ubuntu
+
+<p align="center"> 
+<img src="images/terminal-01.png">
+</p>
+
+Volte para o Host OS e liste as VM'ms
+
+```bash
+sudo virsh -c qemu:///system list
+```
+
+<p align="center"> 
+<img src="images/terminal-02.png">
+</p>
+
 # Definindo um IP estático utilizando a rede Default Nat-based networking
 
 Iremos utilizar a rede **default** criada no processo de instalação do KVM
@@ -131,3 +151,158 @@ virsh net-info default
 A rede baseada em NAT é comumente fornecida e habilitada como padrão pela maioria das principais distribuições de Linux que suportam virtualização KVM.
 
 Esta configuração de rede usa uma ponte Linux em combinação com Network Address Translation (NAT) para permitir que um sistema operacional convidado obtenha conectividade de saída, independentemente do tipo de rede (com fio, sem fio, dial-up e assim por diante) usado no host KVM sem exigindo qualquer configuração de administrador específica.
+
+## Definindo o IP estático para a nossa VM
+
+Execute o script define-static-networking-kvm.sh
+
+```bash
+./define-static-networking-kvm.sh
+```
+
+Coloque o nome da máquina virtual que você quer definir o IP, no nosso caso é ubuntu-01
+
+<p align="center"> 
+<img src="images/terminal-03.png">
+</p>
+
+Copie a linha que começa com **<host mac='**
+
+Edite o arquivo de definição de rede
+
+```bash
+sudo virsh net-edit default
+```
+Adicione a linha que copiamos acima em baixo de **<range**
+
+<p align="center"> 
+<img src="images/terminal-04.png">
+</p>
+
+Salve o arquivo e execute os seguintes comandos
+
+```bash
+sudo virsh net-destroy default
+```
+
+```bash
+sudo virsh net-start default
+```
+
+```bash
+sudo virsh shutdown ubuntu-01
+```
+
+```bash
+sudo systemctl stop libvirtd && sudo systemctl start libvirtd
+```
+
+```bash
+sudo virsh start ubuntu-01
+```
+
+Teste o SSH para a nossa VM
+
+```bash
+ssh ubuntu@XXX.XXX.XXX.XXX
+```
+
+<p align="center"> 
+<img src="images/terminal-05.png">
+</p>
+
+# Expondo nossa VM para acesso externo via IP Tables
+
+Como estamos utilizando a configuração de rede default do tipo NAT não temos uma interface de rede adicionada em nossa máquina virtual, utilizaremos uma regra de IP Tables baseado em uma porta para realizar o acesso externo ao nosso servidor virtualizado
+
+Utilizaremos o [Hooks do QEMU](https://libvirt.org/hooks.html)
+
+Crie o seguinte arquivo **/etc/libvirt/hooks/qemu**
+
+```bash
+sudo vim /etc/libvirt/hooks/qemu
+```
+
+Adicione o seguinte conteúdo
+
+```bash
+#!/bin/bash
+
+# Script that add iptables rule to forward traffic to VM's
+
+if [ "${1}" = "VM NAME" ]; then
+
+   # Update the following variables to fit your setup
+   GUEST_IP=
+   GUEST_PORT=
+   HOST_PORT=
+
+   if [ "${2}" = "stopped" ] || [ "${2}" = "reconnect" ]; then
+	/sbin/iptables -D FORWARD -o virbr0 -p tcp -d $GUEST_IP --dport $GUEST_PORT -j ACCEPT
+	/sbin/iptables -t nat -D PREROUTING -p tcp --dport $HOST_PORT -j DNAT --to $GUEST_IP:$GUEST_PORT
+   fi
+   if [ "${2}" = "start" ] || [ "${2}" = "reconnect" ]; then
+	/sbin/iptables -I FORWARD -o virbr0 -p tcp -d $GUEST_IP --dport $GUEST_PORT -j ACCEPT
+	/sbin/iptables -t nat -I PREROUTING -p tcp --dport $HOST_PORT -j DNAT --to $GUEST_IP:$GUEST_PORT
+   fi
+fi
+```
+
+Substituindo as seguintes variavéis pelas de nossas, em meu caso ficou assim:
+
+```bash
+#!/bin/bash
+
+# Script that add iptables rule to forward traffic to VM's
+
+if [ "${1}" = "ubuntu-01" ]; then
+
+   # Update the following variables to fit your setup
+   GUEST_IP=192.168.122.3
+   GUEST_PORT=22
+   HOST_PORT=2222
+
+   if [ "${2}" = "stopped" ] || [ "${2}" = "reconnect" ]; then
+	/sbin/iptables -D FORWARD -o virbr0 -p tcp -d $GUEST_IP --dport $GUEST_PORT -j ACCEPT
+	/sbin/iptables -t nat -D PREROUTING -p tcp --dport $HOST_PORT -j DNAT --to $GUEST_IP:$GUEST_PORT
+   fi
+   if [ "${2}" = "start" ] || [ "${2}" = "reconnect" ]; then
+	/sbin/iptables -I FORWARD -o virbr0 -p tcp -d $GUEST_IP --dport $GUEST_PORT -j ACCEPT
+	/sbin/iptables -t nat -I PREROUTING -p tcp --dport $HOST_PORT -j DNAT --to $GUEST_IP:$GUEST_PORT
+   fi
+fi
+```
+
+Onde GUEST_IP é o IP da nossa VM, GUEST_PORT é a porta que faremos o redirecionamento do trafego nesse caso a porta do SSH, HOST_PORT a porta que mapearemos do host para a guest
+
+```bash
+sudo chmod +x /etc/libvirt/hooks/qemu
+```
+
+```bash
+sudo virsh shutdown ubuntu-01
+```
+
+```bash
+sudo systemctl stop libvirtd && sudo systemctl start libvirtd
+```
+
+```bash
+sudo virsh start ubuntu-01
+```
+
+Testando o SSH, realize o log-off de nossa EC2 e realize o ssh apontando para a porta que faremos o forward via IP Tables.
+
+> Obs: Não esqueça de liberar o Security Group na nossa EC2 para a porta 2222
+
+```bash
+ssh ubuntu@EC2_IP -p 2222
+```
+
+O resultado deve ser o mesmo de realizar o login de dentro do Host OS
+
+<p align="center"> 
+<img src="images/terminal-05.png">
+</p>
+
+# Criando nosso primeiro servidor Windows
