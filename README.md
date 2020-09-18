@@ -1,100 +1,100 @@
 # aws-bare-metal-kvm
 
-O propósito desse repositório é mostrar formas de virtualização utilizando KVM em um servidor bare metal na AWS
+The purpose of this repository is to show virtualization using KVM on a bare metal server on AWS
 
-Esse tipo de instâncias EC2 oferecem o melhor dos dois mundos, permitindo que o sistema operacional seja executado diretamente no hardware subjacente, ao mesmo tempo que fornece acesso a todos os benefícios da nuvem.
+This type of EC2 Instances offer the best of both worlds, allowing the operacional system to be executed directly on the underlying hardware, at the same time that it provides acess to all of the benefits of the cloud.
 
 [Amazon EC2 Bare Metal Instances](https://aws.amazon.com/blogs/aws/new-amazon-ec2-bare-metal-instances-with-direct-access-to-hardware/)
 
-# Sumário
+# Sumary
 
-- [Pré-requisitos](#pr--requisitos)
-- [Criando nossa Amazon EC2](#criando-nossa-amazon-ec2)
-- [Instalando o KVM](#instalando-o-kvm)
-- [Criando a primeira VM Ubuntu](#criando-a-primeira-vm-ubuntu)
-- [Definindo um IP estático utilizando a rede Default Nat-based networking](#definindo-um-ip-est-tico-utilizando-a-rede-default-nat-based-networking)
-  * [Definindo o IP estático para a nossa VM](#definindo-o-ip-est-tico-para-a-nossa-vm)
-- [Expondo nossa VM para acesso externo via IP Tables](#expondo-nossa-vm-para-acesso-externo-via-ip-tables)
-- [Criando nosso primeiro servidor Windows](#criando-nosso-primeiro-servidor-windows)
-  * [Pré-requisitos](#pr--requisitos-1)
-  * [Criando VM Windows](#criando-vm-windows)
-- [Referências](#refer-ncias)
+- [Prerequisites](#prerequisites)
+- [Creating our Amazon EC2](#creating-our-amazon-ec2)
+- [Installing KVM](#installing-kvm)
+- [Creating the first Ubuntu VM ](#creating-the-first-ubuntu-vm)
+- [Defining an static IP using the Default network Nat-based networking](#defining-an-static-ip-using-the-default-network-nat-based-networking)
+  * [Defining an static IP for our VM](#defining-an-static-ip-for-our-vm)
+- [Exposing our VM to external access via IP Tables](#exposing-our-vm-to-external-access-via-ip-tables)
+- [Creating our first Windows server](#creating-our-first-windows-server)
+  * [Prerequisites](#prerequisites-1)
+  * [Creating a Windows VM](#creating-a-windows-vm)
+- [References](#references)
 
-# Pré-requisitos
+# Prerequisites
 
-- Amazon VPC configurada com no minínimo uma subnet pública
+- Configured Amazon VPC with at least one public subnet
 
-# Criando nossa Amazon EC2
+# Creating our Amazon EC2
 
-Para essa demonstração utilizaremos a EC2 do tipo **i3.metal**:
+For this demonstration we will use an EC2 of type: **i3.metal**:
 
 > [i3.metal](https://aws.amazon.com/pt/ec2/instance-types/i3/)
 
-Logue no console da AWS e selecione EC2 > instances > Launch Instance
+Login to AWS console and select EC2 > instances > Launch Instance
 
 <p align="center"> 
 <img src="images/ec2-01.png">
 </p>
 
->Obs: Utilizaremos o Ubuntu 18.04 como sistema operacional
+>Obs: We will use Ubuntu 18.04 as the operational system
 
-Selecione a instância do tipo i3.large > Configure Instance Details
+Select the instance type i3.large > Configure Instance Details
 
 <p align="center"> 
 <img src="images/ec2-02.png">
 </p>
 
-Selecione a VPC onde você quer fazer o lançamento da sua instância e também a subnet
+Select the VPC and subnet where you want to do the launch of your instance 
 
->Obs: Será necessário realizar SSH na instância portanto, realize o lançamento em uma subnet pública ou possua mecânismos para acessar sua instância (VPN/Bastion)
+>Obs: It will be necessary to accomplish SSH on your instance, therefore realize the launch on a public subnet or have mechanisms to access your instance (VPN/Bastion) 
 
-Selecione a quantidade de GB para o volume Root (Utilizaremos essa máquina virtual para realizar virtualização portanto defina uma quantidade adequada)
+Select the amount of GB for the Root Volume (We will use this virtual machine to do virtualization, therefore select a proper ammount)
 
 <p align="center"> 
 <img src="images/ec2-03.png">
 </p>
 
-Defina a Tag Name para a sua EC2
+Define a Name Tag for your EC2
 
 <p align="center"> 
 <img src="images/ec2-04.png">
 </p>
 
-> Obs: Utilizarei o nome kvm-virtualization-lab
+> Obs: I will use the name kvm-virtualization-lab
 
-Clique em **Configure Security Group**
+Click on **Configure Security Group**
 
-Crie um Security Group específico para a sua EC2 ou seleciona um já existente.
+Create a specific Security Group for your EC2 or select one that already exists.
 
->Obs: Lembre-se de verificar as portas necessárias no Security Group para realizar o acesso remoto as nossas máquinas virtualizadas
+>Obs: Remember to check the necessary ports on the Security Group to do the remote access to our virtual machines
 
-Clique em **Review and Launch**
+Click on **Review and Launch**
 
-Valide as informações e clique em **Launch**
+Validate the informations and click on **Launch**
 
-Crie uma chave privada .pem caso você não possua ou utilize uma já existente
+Create a private key .pem in case you don´t have or utilize one that already exists
 
 <p align="center"> 
 <img src="images/ec2-05.png">
 </p>
 
-Clique em **Launch Instance**
+Click on **Launch Instance**
 
-Aguarde alguns minutos para que sua EC2 esteja pronta para ser acessada
+Wait a few minutes for your EC2 Instance be ready to be accessed 
 
 <p align="center"> 
 <img src="images/ec2-06.png">
 </p>
 
-# Instalando o KVM
+# Installing KVM
 
-Neste repositório existem alguns scripts que nos ajudarão a realizar todos as etapas de configuração.
+In this repository there are some scripts that will help us to accomplish all of the configuration steps.
 
 ```bash
 ssh -i bare-metal-demo.pem ubuntu@XXX.XXX.XXX.XXX
 ```
 
-Realize SSH no servidor e siga os passos a seguir:
+Realize SSH on the server and follow the following steps:
 
 
 ```bash
@@ -109,23 +109,23 @@ cd /opt/ && apt-get update && apt-get install git -y
 git clone https://github.com/BRCentralSA/aws-bare-metal-kvm.git
 ```
 
-Realize a instalacão do KVM e dos componentes necessários
+Do the KVM and the necessary components installation 
 
 ```
 cd aws-bare-metal-kvm && ./install-kvm-ubuntu.sh
 ```
 
-# Criando a primeira VM Ubuntu
+# Creating the first Ubuntu VM
 
-Nesta demonstração iremos criar um servidor Ubuntu 18.04 com 1GB de RAM e 2 vCpu
+For this demonstration we will create a Ubuntu 18.04 server with 1GB of RAM and 2 vCpu
 
 ```
 ./create-ubuntu-vm.sh
 ```
 
-Aguarde a finalização da criação, pode levar algum tempo, após finalizar será necessário realizar o login novamente no servidor
+Wait for the creation completion, it can take some time. After completion it will be necessary to login again in the server
 
-Uma tela de Logon será mostrada, utilize o usuário e senha default.
+A Logon screen will be shown, use the default user and password.
 
 **User:** ubuntu
 
@@ -135,7 +135,7 @@ Uma tela de Logon será mostrada, utilize o usuário e senha default.
 <img src="images/terminal-01.png">
 </p>
 
-Volte para o Host OS e liste as VM'ms
+Go back to the Host OS and list the VM'ms
 
 ```bash
 sudo virsh -c qemu:///system list
@@ -145,13 +145,13 @@ sudo virsh -c qemu:///system list
 <img src="images/terminal-02.png">
 </p>
 
-# Definindo um IP estático utilizando a rede Default Nat-based networking
+# Defining an static IP using the Default network Nat-based networking
 
-Iremos utilizar a rede **default** criada no processo de instalação do KVM
+We will use the **default** network  crated on the KVM instalation process
 
-Utilizando o **virsh**
+Using **virsh**
 
-Você pode criar, excluir, executar, parar e gerenciar suas máquinas virtuais a partir da linha de comando, usando uma ferramenta chamada virsh. Virsh é particularmente útil para administradores Linux avançados, interessados ​​em scripts ou automatizar alguns aspectos do gerenciamento de suas máquinas virtuais
+You can create, exclude, execute, stop and manage your virtual machines from the command line, using a tool called virsh. Virsh is mostly useful for advanced Linux administrators, interested ​​in scripts or automating some aspects of managing their virtual machines
 
 ```bash
 virsh net-list
@@ -162,38 +162,38 @@ virsh net-list
 virsh net-info default
 ```
 
-A rede baseada em NAT é comumente fornecida e habilitada como padrão pela maioria das principais distribuições de Linux que suportam virtualização KVM.
+The NAT based network is commonly provided and enabled by default fot the majority of the principal linux distributions that supports  KVM virtualization.
 
-Esta configuração de rede usa uma ponte Linux em combinação com Network Address Translation (NAT) para permitir que um sistema operacional convidado obtenha conectividade de saída, independentemente do tipo de rede (com fio, sem fio, dial-up e assim por diante) usado no host KVM sem exigindo qualquer configuração de administrador específica.
+This network configuration uses a Linux brigde combined with Network Address Translation (NAT) to allow that a guest operational system gets output conectivity , independent of the network type (with wire, wireless, dial-up and goes on) used on KVM host with no need of any specific administrator configuration.
 
-## Definindo o IP estático para a nossa VM
+## Defining an static IP for our VM
 
-Execute o script define-static-networking-kvm.sh
+Execute the script define-static-networking-kvm.sh
 
 ```bash
 ./define-static-networking-kvm.sh
 ```
 
-Coloque o nome da máquina virtual que você quer definir o IP, no nosso caso é ubuntu-01
+Put the name of the virtual machine that you want to define the IP, on our case is ubuntu-01
 
 <p align="center"> 
 <img src="images/terminal-03.png">
 </p>
 
-Copie a linha que começa com **<host mac='**
+Copy the line that starts with **<host mac='**
 
-Edite o arquivo de definição de rede
+Edit the file of network definition
 
 ```bash
 sudo virsh net-edit default
 ```
-Adicione a linha que copiamos acima em baixo de **<range**
+Add the line that we copied above under **<range**
 
 <p align="center"> 
 <img src="images/terminal-04.png">
 </p>
 
-Salve o arquivo e execute os seguintes comandos
+Save the file and execute the following commands
 
 ```bash
 sudo virsh net-destroy default
@@ -215,7 +215,7 @@ sudo systemctl stop libvirtd && sudo systemctl start libvirtd
 sudo virsh start ubuntu-01
 ```
 
-Teste o SSH para a nossa VM
+Test the SSH for our VM
 
 ```bash
 ssh ubuntu@XXX.XXX.XXX.XXX
@@ -225,19 +225,19 @@ ssh ubuntu@XXX.XXX.XXX.XXX
 <img src="images/terminal-05.png">
 </p>
 
-# Expondo nossa VM para acesso externo via IP Tables
+# Exposing our VM to external access via IP Tables
 
-Como estamos utilizando a configuração de rede default do tipo NAT não temos uma interface de rede adicionada em nossa máquina virtual, utilizaremos uma regra de IP Tables baseado em uma porta para realizar o acesso externo ao nosso servidor virtualizado
+Since we are using the configuration of a default network of type NAT we don´t have a network interface addded on our virtual machine, we will use a rule of IP Tables based on a port to accomplish the external access to our virtual server.
 
-Utilizaremos o [Hooks do QEMU](https://libvirt.org/hooks.html)
+We will use the [Hooks of QEMU](https://libvirt.org/hooks.html)
 
-Crie o seguinte arquivo **/etc/libvirt/hooks/qemu**
+Crieate the following file **/etc/libvirt/hooks/qemu**
 
 ```bash
 sudo vim /etc/libvirt/hooks/qemu
 ```
 
-Adicione o seguinte conteúdo
+Add the following content
 
 ```bash
 #!/bin/bash
@@ -262,7 +262,7 @@ if [ "${1}" = "VM NAME" ]; then
 fi
 ```
 
-Substituindo as seguintes variavéis pelas de nossas, em meu caso ficou assim:
+Replacing the following variables for ours, in my case it was like this:
 
 ```bash
 #!/bin/bash
@@ -287,7 +287,7 @@ if [ "${1}" = "ubuntu-01" ]; then
 fi
 ```
 
-Onde GUEST_IP é o IP da nossa VM, GUEST_PORT é a porta que faremos o redirecionamento do trafego nesse caso a porta do SSH, HOST_PORT a porta que mapearemos do host para a guest
+Where GUEST_IP is the IP of our VM, GUEST_PORT is the port that we will do the  redirect of the traffic, in this case SSH port, HOST_PORT the port that we will map from the host to the guest
 
 ```bash
 sudo chmod +x /etc/libvirt/hooks/qemu
@@ -305,105 +305,105 @@ sudo systemctl stop libvirtd && sudo systemctl start libvirtd
 sudo virsh start ubuntu-01
 ```
 
-Testando o SSH, realize o log-off de nossa EC2 e realize o ssh apontando para a porta que faremos o forward via IP Tables.
+Testing the SSH, log-off from our EC2 and do the ssh pointing for the port that we will do the forward via IP Tables.
 
-> Obs: Não esqueça de liberar o Security Group na nossa EC2 para a porta 2222
+> Obs: Don´t forget to open the Security Group on our EC2 on the port 2222
 
 ```bash
 ssh ubuntu@EC2_IP -p 2222
 ```
 
-O resultado deve ser o mesmo de realizar o login de dentro do Host OS
+The result should be the same of loging in from inside the Host OS 
 
 <p align="center"> 
 <img src="images/terminal-05.png">
 </p>
 
-# Criando nosso primeiro servidor Windows
+# Creating our first Windows server
 
-Criando nosso primeiro servidor Windows, para essa demo utilizaremos o [Windows Server 2019](https://www.microsoft.com/pt-br/windows-server), como não possuímos display gráfico em nossa EC2 realizaremos o setup via VNC (Virtual Network Computing)
+Creating our first Windows server, for this demo we will use the [Windows Server 2019](https://www.microsoft.com/pt-br/windows-server), since we don´t have graphic display on our EC2 we will do the setup via VNC (Virtual Network Computing)
 
-## Pré-requisitos
+## Prerequisites
 
 - [ISO Windows Server 2019](https://www.microsoft.com/pt-br/evalcenter/evaluate-windows-server-2019)
 - VNC Software
 
 
-## Criando VM Windows
+## Creating a Windows VM 
 
-Utilizaremos scripts de apoio para criação do servidor Windows com 2GB de RAM e 4 vCpu
+We will use support scripts for the creation of the Windows server with 2GB of RAM and 4 vCpu
 
 
 ```
 ./create-windows-vm.sh
 ```
-Aponte para a ISO que você fez o download nos pré-requisitos
+Point for the ISO that you  downloaded on the prerequisites
 
 <p align="center"> 
 <img src="images/windows-iso.png">
 </p>
 
-O processo de instalação será iniciado
+the process of installation will be initiated
 
 <p align="center"> 
 <img src="images/windows-install.png">
 </p>
 
-Precisaremos conectar via VNC em nossa máquina virtual para iniciar o setup de instalação do Windows gráficamente
+We will need to conect via VNC on our virtual machine to graphically start the setup of Windows installation 
 
-> Obs: Não esqueça de liberar o Security Group na nossa EC2 para a porta 5904
+> Obs: Don´t forget to open traffic on the Security Group of our EC2 to the port 5904
 
 <p align="center"> 
 <img src="images/vnc.png">
 </p>
 
-Conectaremos no **IP Público de nossa EC2 na porta 5904**
+We will connect to the **Public IP of our EC2 on port 5904**
 
 <p align="center"> 
 <img src="images/windows-vnc-01.png">
 </p>
 
-Clique em Next para iniciar a instalação e depois em Install Now
+Click on Next to start the installation and after on Install Now
 
 <p align="center"> 
 <img src="images/windows-vnc-02.png">
 </p>
 
-Selecione a segunda opção e clique em Next
+Select the second option and click on Next
 
 <p align="center"> 
 <img src="images/windows-vnc-03.png">
 </p>
 
-Clique em Load Driver, selecionaremos o driver do VirtIO
+Click on Load Driver, we will select the driver of VirtIO
 
 <p align="center"> 
 <img src="images/windows-vnc-04.png">
 </p>
 
-Clique em Browse > E: > amd64 > 2K19 e depois em Next
+Click on Browse > E: > amd64 > 2K19 and after on Next
 
 <p align="center"> 
 <img src="images/windows-vnc-05.png">
 </p>
 
-A Instalação será iniciada, aguarde até a finalização
+The installation will be initiated, wait untill it is complete
 
 <p align="center"> 
 <img src="images/windows-vnc-06.png">
 </p>
 
-Defina a senha para o usuário Administrator e clique em Finish
+Define a password for the Administrator user and click on Finish
 
 <p align="center"> 
 <img src="images/windows-vnc-07.png">
 </p>
 
-A instalação terá sido finalizada
+The installation will be complete
 
-> Obs: Pode ser que seja necessário realizar a instalação de alguns drivers extras. Instalação de [virtio-drivers](https://linuxhint.com/install_virtio_drivers_kvm_qemu_windows_vm/)
+> Obs: It can be necessary to realize the installation of some extra drivers. Installation of [virtio-drivers](https://linuxhint.com/install_virtio_drivers_kvm_qemu_windows_vm/)
 
-# Referências
+# References
 
 Networking with KVM
 https://aboullaite.me/kvm-qemo-forward-ports-with-iptables/
