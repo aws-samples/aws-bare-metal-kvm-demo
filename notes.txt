@@ -1,0 +1,15 @@
+Networking with KVM
+https://aboullaite.me/kvm-qemo-forward-ports-with-iptables/
+
+Setup KVM on Ubuntu 18.04
+https://blog.programster.org/set-up-ubuntu-18-04-KVM-server
+https://ostechnix.com/setup-headless-virtualization-server-using-kvm-ubuntu/
+
+Helper Script to create VM
+https://blog.programster.org/ubuntu-18-04-getting-started-with-kvm-using-php-helper-script
+
+Forwarding connection
+https://wiki.libvirt.org/page/Networking#Forwarding_Incoming_Connections
+
+Libvirt Default Networking
+https://wiki.libvirt.org/page/Networking
