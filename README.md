@@ -319,7 +319,7 @@ The result should be the same of loging in from inside the Host OS
 <img src="images/terminal-05.png">
 </p>
 
-# References
+## References
 
 Networking with KVM
 https://aboullaite.me/kvm-qemo-forward-ports-with-iptables/
@@ -336,3 +336,14 @@ https://wiki.libvirt.org/page/Networking#Forwarding_Incoming_Connections
 
 Libvirt Default Networking
 https://wiki.libvirt.org/page/Networking
+
+
+## Security
+
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+
+
+## License
+
+This library is licensed under the MIT-0 License. See the LICENSE file.
+
