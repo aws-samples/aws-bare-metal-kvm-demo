@@ -8,21 +8,22 @@ This type of EC2 Instances offer the best of both worlds, allowing the operacion
 
 # Sumary
 
-- [Prerequisites](#prerequisites)
-- [Creating our Amazon EC2](#creating-our-amazon-ec2)
-- [Installing KVM](#installing-kvm)
-- [Creating the first Ubuntu VM ](#creating-the-first-ubuntu-vm)
-- [Defining an static IP using the Default network Nat-based networking](#defining-an-static-ip-using-the-default-network-nat-based-networking)
-  * [Defining an static IP for our VM](#defining-an-static-ip-for-our-vm)
-- [Exposing our VM to external access via IP Tables](#exposing-our-vm-to-external-access-via-ip-tables)
-- [Creating our first Windows server](#creating-our-first-windows-server)
-  * [Prerequisites](#prerequisites-1)
-  * [Creating a Windows VM](#creating-a-windows-vm)
-- [References](#references)
+* [Prerequisites](#prerequisites)
+* [Creating our Amazon EC2](#creating-our-amazon-ec2)
+* [Installing KVM](#installing-kvm)
+* [Creating the first Ubuntu VM ](#creating-the-first-ubuntu-vm)
+* [Defining an static IP using the Default network Nat-based networking](#defining-an-static-ip-using-the-default-network-nat-based-networking)
+  + [Defining an static IP for our VM](#defining-an-static-ip-for-our-vm)
+* [Exposing our VM to external access via IP Tables](#exposing-our-vm-to-external-access-via-ip-tables)
+* [Creating our first Windows server](#creating-our-first-windows-server)
+  + [Prerequisites](#prerequisites-1)
+  + [Creating a Windows VM](#creating-a-windows-vm)
+* [References](#references)
 
 # Prerequisites
 
-- Configured Amazon VPC with at least one public subnet
+* Configured Amazon VPC with at least one public subnet
+* If you are going to test Windows, download [Windows ISO](https://www.microsoft.com/evalcenter/evaluate-windows-server-2019)
 
 # Creating our Amazon EC2
 
@@ -36,9 +37,9 @@ Login to AWS console and select EC2 > instances > Launch Instance
 <img src="images/ec2-01.png">
 </p>
 
->Obs: We will use Ubuntu 18.04 as the operational system
+> Obs: We will use Ubuntu 18.04 as the operational system
 
-Select the instance type i3.large > Configure Instance Details
+Select the instance type i3.metal > Configure Instance Details
 
 <p align="center"> 
 <img src="images/ec2-02.png">
@@ -46,7 +47,7 @@ Select the instance type i3.large > Configure Instance Details
 
 Select the VPC and subnet where you want to do the launch of your instance 
 
->Obs: It will be necessary to accomplish SSH on your instance, therefore realize the launch on a public subnet or have mechanisms to access your instance (VPN/Bastion) 
+> Obs: It will be necessary to accomplish SSH on your instance, therefore realize the launch on a public subnet or have mechanisms to access your instance (VPN/Bastion) 
 
 Select the amount of GB for the Root Volume (We will use this virtual machine to do virtualization, therefore select a proper ammount)
 
@@ -66,7 +67,7 @@ Click on **Configure Security Group**
 
 Create a specific Security Group for your EC2 or select one that already exists.
 
->Obs: Remember to check the necessary ports on the Security Group to do the remote access to our virtual machines
+> Obs: Remember to check the necessary ports on the Security Group to do the remote access to our virtual machines
 
 Click on **Review and Launch**
 
@@ -90,36 +91,35 @@ Wait a few minutes for your EC2 Instance be ready to be accessed
 
 In this repository there are some scripts that will help us to accomplish all of the configuration steps.
 
-```bash
+``` bash
 ssh -i bare-metal-demo.pem ubuntu@XXX.XXX.XXX.XXX
 ```
 
 Realize SSH on the server and follow the following steps:
 
-
-```bash
+``` bash
 sudo su - 
 ```
 
-```bash
+``` bash
 cd /opt/ && apt-get update && apt-get install git -y
 ```
 
-```
-git clone https://github.com/BRCentralSA/aws-bare-metal-kvm.git
+``` 
+git clone https://github.com/aws-samples/aws-bare-metal-kvm-demo.git
 ```
 
 Do the KVM and the necessary components installation 
 
-```
-cd aws-bare-metal-kvm && ./install-kvm-ubuntu.sh
+``` 
+cd aws-bare-metal-kvm-demo && ./install-kvm-ubuntu.sh
 ```
 
 # Creating the first Ubuntu VM
 
 For this demonstration we will create a Ubuntu 18.04 server with 1GB of RAM and 2 vCpu
 
-```
+``` 
 ./create-ubuntu-vm.sh
 ```
 
@@ -137,7 +137,7 @@ A Logon screen will be shown, use the default user and password.
 
 Go back to the Host OS and list the VM'ms
 
-```bash
+``` bash
 sudo virsh -c qemu:///system list
 ```
 
@@ -153,12 +153,11 @@ Using **virsh**
 
 You can create, exclude, execute, stop and manage your virtual machines from the command line, using a tool called virsh. Virsh is mostly useful for advanced Linux administrators, interested ​​in scripts or automating some aspects of managing their virtual machines
 
-```bash
+``` bash
 virsh net-list
 ```
 
-
-```bash
+``` bash
 virsh net-info default
 ```
 
@@ -170,7 +169,7 @@ This network configuration uses a Linux brigde combined with Network Address Tra
 
 Execute the script define-static-networking-kvm.sh
 
-```bash
+``` bash
 ./define-static-networking-kvm.sh
 ```
 
@@ -184,9 +183,10 @@ Copy the line that starts with **<host mac='**
 
 Edit the file of network definition
 
-```bash
+``` bash
 sudo virsh net-edit default
 ```
+
 Add the line that we copied above under **<range**
 
 <p align="center"> 
@@ -195,29 +195,29 @@ Add the line that we copied above under **<range**
 
 Save the file and execute the following commands
 
-```bash
+``` bash
 sudo virsh net-destroy default
 ```
 
-```bash
+``` bash
 sudo virsh net-start default
 ```
 
-```bash
+``` bash
 sudo virsh shutdown ubuntu-01
 ```
 
-```bash
+``` bash
 sudo systemctl stop libvirtd && sudo systemctl start libvirtd
 ```
 
-```bash
+``` bash
 sudo virsh start ubuntu-01
 ```
 
 Test the SSH for our VM
 
-```bash
+``` bash
 ssh ubuntu@XXX.XXX.XXX.XXX
 ```
 
@@ -233,13 +233,13 @@ We will use the [Hooks of QEMU](https://libvirt.org/hooks.html)
 
 Crieate the following file **/etc/libvirt/hooks/qemu**
 
-```bash
+``` bash
 sudo vim /etc/libvirt/hooks/qemu
 ```
 
 Add the following content
 
-```bash
+``` bash
 #!/bin/bash
 
 # Script that add iptables rule to forward traffic to VM's
@@ -264,7 +264,7 @@ fi
 
 Replacing the following variables for ours, in my case it was like this:
 
-```bash
+``` bash
 #!/bin/bash
 
 # Script that add iptables rule to forward traffic to VM's
@@ -289,19 +289,19 @@ fi
 
 Where GUEST_IP is the IP of our VM, GUEST_PORT is the port that we will do the  redirect of the traffic, in this case SSH port, HOST_PORT the port that we will map from the host to the guest
 
-```bash
+``` bash
 sudo chmod +x /etc/libvirt/hooks/qemu
 ```
 
-```bash
+``` bash
 sudo virsh shutdown ubuntu-01
 ```
 
-```bash
+``` bash
 sudo systemctl stop libvirtd && sudo systemctl start libvirtd
 ```
 
-```bash
+``` bash
 sudo virsh start ubuntu-01
 ```
 
@@ -309,7 +309,7 @@ Testing the SSH, log-off from our EC2 and do the ssh pointing for the port that 
 
 > Obs: Don´t forget to open the Security Group on our EC2 on the port 2222
 
-```bash
+``` bash
 ssh ubuntu@EC2_IP -p 2222
 ```
 
@@ -337,13 +337,10 @@ https://wiki.libvirt.org/page/Networking#Forwarding_Incoming_Connections
 Libvirt Default Networking
 https://wiki.libvirt.org/page/Networking
 
-
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
 
-
 ## License
 
 This library is licensed under the MIT-0 License. See the LICENSE file.
-
